@@ -1,16 +1,16 @@
 {
   "manifestVersion": 1,
-  "id": "ai-code-review",
-  "publisher": "TommiLaukkanen",
+  "id": "fastronome-ai-code-review",
+  "publisher": "Fastronome",
   "version": "1.0.20",
-  "name": "AI Code Review Task",
+  "name": "Fastronome AI Code Review Task",
   "description": "AI code review extension to review pull request changes using your own Azure OpenAI endpoints",
   "public": false,
   "categories": ["Azure Repos", "Azure Pipelines"],
   "tags": ["ai", "openai", "gpt", "llm", "gpt4", "copilot", "code", "review", "chatgpt"],
   "repository": {
     "type": "git",
-    "uri": "https://github.com/tlaukkanen/azure-devops-ai-code-review"
+    "uri": "https://github.com/fastronome/azure-devops-ai-code-review"
   },
   "icons": {
     "default": "images/icon-128x128.png"
@@ -53,7 +53,7 @@
   ],
   "links": {
     "repository": {
-      "uri": "https://github.com/tlaukkanen/azure-devops-ai-code-review"
+      "uri": "https://github.com/fastronome/azure-devops-ai-code-review"
     }
   },
   "screenshots": [

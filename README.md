@@ -1,15 +1,17 @@
-# AI Code Review DevOps Extension
-
-<a href="https://www.buymeacoffee.com/tlaukkanen" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+# Fastronome AI Code Review DevOps Extension
 
 ## Supercharge Your Code Reviews with Azure Open AI Services
 
 Use your own Azure OpenAI service endpoints to provide pull request code reviews while keeping your code private.
 
+This repository is an MIT-licensed fork published and maintained by **Fastronome**.
+Current maintainer: **Alexey Samoylov**.
+Original project lineage is preserved and attributed in the license section below.
+
 - **AI Powered Insights:** Optimized for latest LLM models like GPT-4o-mini, which provides optimal high performance with small cost.
 - **Security and Privacy:** Use your own Azure OpenAI model deployment for reviews
 - **Automated Summaries:** Let AI summarise your pull request so it's easier for humans to follow. AI will also provide feedback for all changes related to bugs, performance, best practices etc.
-- **Easy to install:** A simple one-click installation from the [Azure DevOps Marketplace]([https://marketplace.visualstudio.com/azuredevops](https://marketplace.visualstudio.com/items?itemName=TommiLaukkanen.ai-code-review)) gets you up and running instantly. Configure to your pipeline as shown below.
+- **Easy to install:** A simple one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=Fastronome.fastronome-ai-code-review) gets you up and running instantly. Configure to your pipeline as shown below.
 - **Faster Reviews:** Reduce the time spent on code reviews. Let Open AI handle the routine, allowing your team to focus on impactful work.
 - **Configurable and Customizable:** Tailor the extension to your needs with customizable settings. Specify the Open AI model, define file exclusions, and more.
 
@@ -23,7 +25,7 @@ Click for larger version:
 
 ## What does it cost?
 
-The extension itself is free. The reviews will utilize your own Azure OpenAI services so it will depend on the model that you deploy. As of today October 2024 the GPT-4o-mini seems to be optimal for this purpose and is cheap to use - today price for input prompt was $0.15 per 1M tokens, output was $0.60 per 1M tokens. While completing many pull requests the price per code review ranges from ~$0.0002 to ~$0.002 per review - so if you have 1000 PRs per month it's a [price of coffee](https://www.buymeacoffee.com/tlaukkanen) 😉
+The extension itself is free. The reviews will utilize your own Azure OpenAI services so it will depend on the model that you deploy. As of today October 2024 the GPT-4o-mini seems to be optimal for this purpose and is cheap to use - today price for input prompt was $0.15 per 1M tokens, output was $0.60 per 1M tokens. While completing many pull requests the price per code review ranges from ~$0.0002 to ~$0.002 per review, so even 1000 PRs per month is still inexpensive.
 
 You can set the token pricing on the task parameters and then you can see from your logs how much each of the reviews cost:
 
@@ -90,16 +92,20 @@ A: Build Administrators must be given "Contribute to pull requests" access. Chec
 
 ### Bug Reports
 
-If you find a bug or unexpected behavior, please [open a bug report](https://github.com/tlaukkanen/azure-devops-ai-code-review/issues/new?assignees=&labels=bug&template=bug_report.md&title=).
+If you find a bug or unexpected behavior, please [open a bug report](https://github.com/fastronome/azure-devops-ai-code-review/issues/new?assignees=&labels=bug&template=bug_report.md&title=).
 
 ### Feature Requests
 
-If you have ideas for new features or enhancements, please [submit a feature request](https://github.com/tlaukkanen/azure-devops-ai-code-review/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
+If you have ideas for new features or enhancements, please [submit a feature request](https://github.com/fastronome/azure-devops-ai-code-review/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE.txt).
+
+Fastronome publishes and maintains this fork under the same MIT license terms.
+Please retain existing copyright and license notices when redistributing.
 
 If you would like to contribute to the development of this extension, please follow our contribution guidelines.
 
-Project was originally forked from [a1dancole/OpenAI-Code-Review](https://github.com/a1dancole/OpenAI-Code-Review).
+This repository is based on the work of [Tommi Laukkanen's fork](https://github.com/tlaukkanen/azure-devops-ai-code-review),
+which was originally forked from [a1dancole/OpenAI-Code-Review](https://github.com/a1dancole/OpenAI-Code-Review).
