@@ -35,18 +35,27 @@ export class ChatCompletion {
 `
         if (numberOfFilesToReview > 1) {
             this.systemMessage += `
-        Create table that lists the files and their respective comments. For example:
+        Create a markdown table that lists the files, review status, and comments.
+        The table must include columns in this order: File Name | Status | Comments.
+        Use only these status labels:
+        - ✅ Passed: no actionable changes required for the file
+        - ❓ Questions: clarification or missing context is needed before deciding pass/fail
+        - ❌ Not Passed: there is at least one concrete issue requiring changes
+
+        For the whole review to be considered passed, every file row should be marked ✅ Passed.
+
+        Example:
 
         Summary of changes: ...
 
         Feedback on files:
-        | File Name | Comments |
-        | --- | --- |
-        | file1.cs | - comment1 |
-        | file2.js | - comment2<br>- comment3 |
-        | file3.py | No comments |
-        | styles.css | - comment4 |
-`}
+        | File Name | Status | Comments |
+        | --- | --- | --- |
+        | file1.cs | ✅ Passed | No comments |
+        | file2.js | ❓ Questions | - Is this null value expected from the API contract?<br>- Please confirm whether retries are handled upstream |
+        | file3.py | ❌ Not Passed | - Validate user input before constructing the query |
+        | styles.css | ✅ Passed | No comments |
+	`}
     }
 
     public async PerformCodeReview(diff: string, fileName: string): 

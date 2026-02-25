@@ -2,7 +2,7 @@ import tl = require('azure-pipelines-task-lib/task');
 import OpenAI from 'openai';
 import { ChatCompletion } from './chatCompletion';
 import { Repository } from './repository';
-import { PullRequest } from './pullrequest';
+import { PullRequest, PullRequestThreadStatus } from './pullrequest';
 
 export class Main {
     private static _chatCompletion: ChatCompletion;
@@ -64,7 +64,8 @@ export class Main {
 
                 if(review.response.indexOf('NO_COMMENT') < 0) {
                     console.info(`Completed review of file ${fileToReview}`)
-                    await this._pullRequest.AddComment(fileToReview, review.response);
+                    const threadStatus = this.GetThreadStatus(review.response, false);
+                    await this._pullRequest.AddComment(fileToReview, review.response, threadStatus);
                 } else {
                     console.info(`No comments for file ${fileToReview}`)
                 }
@@ -79,7 +80,10 @@ export class Main {
             promptTokensTotal += review.promptTokens;
             completionTokensTotal += review.completionTokens;
 
-            let comment = review.response;
+            const isNoComment = review.response.indexOf('NO_COMMENT') >= 0;
+            let comment = isNoComment
+                ? this.BuildWholeDiffPassOverview(filesToReview)
+                : review.response;
             if(addCostToComments) {
                 const promptTokensCost = promptTokensTotal * (promptTokensPricePerMillionTokens / 1000000);
                 const completionTokensCost = completionTokensTotal * (completionTokensPricePerMillionTokens / 1000000);
@@ -87,11 +91,13 @@ export class Main {
                 comment += `\n\n💰 _It cost $${totalCostString} to create this review_`;
             }
 
-            if(review.response.indexOf('NO_COMMENT') < 0) {
+            if(!isNoComment) {
                 console.info(`Completed review for ${filesToReview.length} files`)
-                await this._pullRequest.AddComment("", comment);
+                const threadStatus = this.GetThreadStatus(review.response, true);
+                await this._pullRequest.AddComment("", comment, threadStatus);
             } else {
-                console.info(`No comments for full diff`)
+                console.info(`No improvement comments for full diff, creating resolved overview for ${filesToReview.length} files`)
+                await this._pullRequest.AddComment("", comment, 'resolved');
             }
         }
 
@@ -107,6 +113,136 @@ export class Main {
             console.info(`💰 Total Cost              : ${totalCostString} $`);
         }
         tl.setResult(tl.TaskResult.Succeeded, "Pull Request reviewed.");
+    }
+
+    private static GetThreadStatus(reviewResponse: string, reviewWholeDiffAtOnce: boolean): PullRequestThreadStatus {
+        if (reviewWholeDiffAtOnce) {
+            return this.GetWholeDiffThreadStatus(reviewResponse);
+        }
+
+        return this.GetPerFileThreadStatus(reviewResponse);
+    }
+
+    private static GetPerFileThreadStatus(reviewResponse: string): PullRequestThreadStatus {
+        const statusMatch = reviewResponse.match(/^\s*(?:\*\*)?status(?:\*\*)?\s*:?\s*(✅\s*passed|❓\s*questions|❌\s*not\s*passed)\s*$/im);
+        if (!statusMatch) {
+            return 'active';
+        }
+
+        return this.ParseStatusCell(statusMatch[1]) === 'passed' ? 'resolved' : 'active';
+    }
+
+    private static GetWholeDiffThreadStatus(reviewResponse: string): PullRequestThreadStatus {
+        const lines = reviewResponse.split(/\r?\n/);
+        let statusColumnIndex = -1;
+        let inStatusTable = false;
+        let sawRecognizedStatus = false;
+
+        for (const rawLine of lines) {
+            const line = rawLine.trim();
+            if (!line.startsWith('|')) {
+                if (inStatusTable) {
+                    break;
+                }
+                continue;
+            }
+
+            const cells = this.ParseMarkdownTableRow(line);
+            if (cells.length === 0) {
+                continue;
+            }
+
+            if (!inStatusTable) {
+                const normalizedHeaderCells = cells.map(cell => cell.trim().toLowerCase());
+                const hasFileName = normalizedHeaderCells.includes('file name');
+                const hasStatus = normalizedHeaderCells.includes('status');
+                const hasComments = normalizedHeaderCells.includes('comments');
+
+                if (hasFileName && hasStatus && hasComments) {
+                    statusColumnIndex = normalizedHeaderCells.indexOf('status');
+                    inStatusTable = true;
+                }
+                continue;
+            }
+
+            if (this.IsMarkdownSeparatorRow(cells)) {
+                continue;
+            }
+
+            if (statusColumnIndex < 0 || statusColumnIndex >= cells.length) {
+                return 'active';
+            }
+
+            const status = this.ParseStatusCell(cells[statusColumnIndex]);
+            if (status === 'unknown') {
+                return 'active';
+            }
+
+            sawRecognizedStatus = true;
+
+            if (status !== 'passed') {
+                return 'active';
+            }
+        }
+
+        return sawRecognizedStatus ? 'resolved' : 'active';
+    }
+
+    private static BuildWholeDiffPassOverview(filesToReview: string[]): string {
+        const fileCount = filesToReview.length;
+        const fileLabel = fileCount === 1 ? 'file' : 'files';
+        const summary = fileCount > 0
+            ? `Summary of changes: Reviewed ${fileCount} ${fileLabel}. No improvement instructions were identified.`
+            : 'Summary of changes: No files matched the configured review filters.';
+
+        const rows = fileCount > 0
+            ? filesToReview.map(file => `| ${this.EscapeMarkdownTableCell(file)} | ✅ Passed | No comments |`)
+            : ['| _No files reviewed_ | ✅ Passed | No comments |'];
+
+        return [
+            summary,
+            '',
+            'Feedback on files:',
+            '| File Name | Status | Comments |',
+            '| --- | --- | --- |',
+            ...rows
+        ].join('\n');
+    }
+
+    private static EscapeMarkdownTableCell(value: string): string {
+        return value.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+    }
+
+    private static ParseMarkdownTableRow(line: string): string[] {
+        return line
+            .split('|')
+            .map(cell => cell.trim())
+            .filter((_, index, arr) => !(index === 0 && arr[index] === '') && !(index === arr.length - 1 && arr[index] === ''));
+    }
+
+    private static IsMarkdownSeparatorRow(cells: string[]): boolean {
+        return cells.every(cell => /^:?-{3,}:?$/.test(cell.trim()));
+    }
+
+    private static ParseStatusCell(statusCell: string): 'passed' | 'questions' | 'not_passed' | 'unknown' {
+        const normalized = statusCell
+            .replace(/\*\*/g, '')
+            .trim()
+            .toLowerCase();
+
+        if (normalized.includes('not passed')) {
+            return 'not_passed';
+        }
+
+        if (normalized.includes('questions')) {
+            return 'questions';
+        }
+
+        if (normalized.includes('passed')) {
+            return 'passed';
+        }
+
+        return 'unknown';
     }
 }
 

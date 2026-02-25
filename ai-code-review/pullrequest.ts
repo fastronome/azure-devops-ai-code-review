@@ -2,6 +2,8 @@ import * as tl from "azure-pipelines-task-lib/task";
 import { Agent } from "https";
 import fetch from 'node-fetch';
 
+export type PullRequestThreadStatus = 'active' | 'resolved';
+
 export class PullRequest {
     private _httpsAgent: Agent;
 
@@ -16,9 +18,9 @@ export class PullRequest {
         });
     }
 
-    public async AddComment(fileName: string, comment: string): Promise<boolean> {
+    public async AddComment(fileName: string, comment: string, threadStatus: PullRequestThreadStatus = 'active'): Promise<boolean> {
 
-        console.info(`Comment added to ${fileName}`);
+        console.info(`Comment added to ${fileName} (thread status: ${threadStatus})`);
 
         if (!fileName.startsWith('/')) {
             fileName = `/${fileName}`;
@@ -31,7 +33,7 @@ export class PullRequest {
                     commentType: 2
                 }
             ],
-            status: 1,
+            status: this.getThreadStatusCode(threadStatus),
             // Don't provide filename if we are commenting on the whole PR
             threadContext: fileName.length > 0 ? {
                 filePath: fileName
@@ -63,6 +65,12 @@ export class PullRequest {
         }
 
         return response.ok;
+    }
+
+    private getThreadStatusCode(threadStatus: PullRequestThreadStatus): number {
+        // Azure DevOps Git Pull Request thread status values:
+        // 1 = active, 2 = fixed (resolved in UI)
+        return threadStatus === 'resolved' ? 2 : 1;
     }
 
     public async DeleteComment(thread: any, comment: any): Promise<boolean> {
