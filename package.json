@@ -1,7 +1,7 @@
 {
   "name": "azure-devops-ai-code-review",
-  "version": "1.0.1",
-  "description": "AI code review extension for Azure DevOps using Azure OpenAI services",
+  "version": "1.0.26",
+  "description": "AI code review extension for Azure DevOps using the OpenAI API",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

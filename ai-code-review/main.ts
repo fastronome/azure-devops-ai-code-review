@@ -1,9 +1,8 @@
 import tl = require('azure-pipelines-task-lib/task');
-import { AzureOpenAI } from 'openai';
+import OpenAI from 'openai';
 import { ChatCompletion } from './chatCompletion';
 import { Repository } from './repository';
 import { PullRequest } from './pullrequest';
-import "@azure/openai/types";
 
 export class Main {
     private static _chatCompletion: ChatCompletion;
@@ -21,9 +20,8 @@ export class Main {
             return;
         }
 
-        const endpointUrl = tl.getInput('azureOpenAiDeploymentEndpointUrl', true)!;
-        const apiKey = tl.getInput('azureOpenAiApiKey', true)!;
-        const apiVersion = tl.getInput('azureOpenAiApiVersion', true)!;
+        const apiKey = tl.getInput('apiKey', true)!;
+        const aiModel = tl.getInput('aiModel', true)!;
         const fileExtensions = tl.getInput('fileExtensions', false);
         const filesToExclude = tl.getInput('fileExcludes', false);
         const additionalPrompts = tl.getInput('additionalPrompts', false)?.split(',')
@@ -33,11 +31,7 @@ export class Main {
         const reviewWholeDiffAtOnce = tl.getBoolInput('reviewWholeDiffAtOnce', false);
         const addCostToComments = tl.getBoolInput('addCostToComments', false);
 
-        const client = new AzureOpenAI({
-            endpoint: endpointUrl,
-            apiKey: apiKey,
-            apiVersion: apiVersion
-        });
+        const client = new OpenAI({ apiKey });
         
         this._repository = new Repository();
         this._pullRequest = new PullRequest();
@@ -49,6 +43,7 @@ export class Main {
             tl.getBoolInput('reviewPerformance', true),
             tl.getBoolInput('reviewBestPractices', true),
             additionalPrompts,
+            aiModel,
             maxTokens,
             filesToReview.length
         );

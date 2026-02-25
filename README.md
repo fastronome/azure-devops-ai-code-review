@@ -1,15 +1,15 @@
 # Fastronome AI Code Review DevOps Extension
 
-## Supercharge Your Code Reviews with Azure Open AI Services
+## Supercharge Your Code Reviews with the OpenAI API
 
-Use your own Azure OpenAI service endpoints to provide pull request code reviews while keeping your code private.
+Use your own OpenAI API key to provide pull request code reviews while keeping your code private.
 
 This repository is an MIT-licensed fork published and maintained by **Fastronome**.
 Current maintainer: **Alexey Samoylov**.
 Original project lineage is preserved and attributed in the license section below.
 
 - **AI Powered Insights:** Optimized for latest LLM models like GPT-4o-mini, which provides optimal high performance with small cost.
-- **Security and Privacy:** Use your own Azure OpenAI model deployment for reviews
+- **Security and Privacy:** Use your own OpenAI API key for reviews
 - **Automated Summaries:** Let AI summarise your pull request so it's easier for humans to follow. AI will also provide feedback for all changes related to bugs, performance, best practices etc.
 - **Easy to install:** A simple one-click installation from the [Azure DevOps Marketplace](https://marketplace.visualstudio.com/items?itemName=Fastronome.fastronome-ai-code-review) gets you up and running instantly. Configure to your pipeline as shown below.
 - **Faster Reviews:** Reduce the time spent on code reviews. Let Open AI handle the routine, allowing your team to focus on impactful work.
@@ -25,7 +25,7 @@ Click for larger version:
 
 ## What does it cost?
 
-The extension itself is free. The reviews will utilize your own Azure OpenAI services so it will depend on the model that you deploy. As of today October 2024 the GPT-4o-mini seems to be optimal for this purpose and is cheap to use - today price for input prompt was $0.15 per 1M tokens, output was $0.60 per 1M tokens. While completing many pull requests the price per code review ranges from ~$0.0002 to ~$0.002 per review, so even 1000 PRs per month is still inexpensive.
+The extension itself is free. The reviews will utilize your own OpenAI API account, so cost depends on the model you choose. As of today October 2024 the GPT-4o-mini seems to be optimal for this purpose and is cheap to use - today price for input prompt was $0.15 per 1M tokens, output was $0.60 per 1M tokens. While completing many pull requests the price per code review ranges from ~$0.0002 to ~$0.002 per review, so even 1000 PRs per month is still inexpensive.
 
 You can set the token pricing on the task parameters and then you can see from your logs how much each of the reviews cost:
 
@@ -34,9 +34,8 @@ You can set the token pricing on the task parameters and then you can see from y
 ## Prerequisites
 
 - [Azure DevOps Account](https://dev.azure.com/)
-- Azure OpenAI endpoint URI
-- Azure OpenAI endpoint key
-- Optional: Pricing for input and output tokens (check from [Azure OpenAI Pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing))
+- OpenAI API key
+- Optional: Pricing for input and output tokens (check from [OpenAI API pricing](https://openai.com/api/pricing/))
 
 ## Getting started
 
@@ -61,9 +60,8 @@ You can set the token pricing on the task parameters and then you can see from y
     steps:
     - task: AICodeReview@1
       inputs:
-        azureOpenAiDeploymentEndpointUrl: $(AzureOpenAiDeploymentEndpoint)
-        azureOpenAiApiKey: $(AzureOpenAiDeploymentKey)
-        azureOpenAiApiVersion: "2024-07-01-preview"
+        apiKey: $(OpenAIApiKey)
+        aiModel: "gpt-4o-mini"
         promptTokensPricePerMillionTokens: "0.15"
         completionTokensPricePerMillionTokens: "0.6"
         addCostToComments: true
@@ -72,11 +70,15 @@ You can set the token pricing on the task parameters and then you can see from y
         reviewBestPractices: true
         reviewWholeDiffAtOnce: true
         maxTokens: 16384
-        fileExtensions: '.js,.ts,.css,.html,.py,.tf'
-        fileExcludes: 'file1.js,file2.py,secret.txt'
+        fileExtensions: '.js,.ts,**/*.sql,*.md'
+        fileExcludes: '**/*.gen.go,**/*.pb.go,secret.txt'
         additionalPrompts: |
           Fix variable naming, Ensure consistent indentation, Review error handling approach, Check for OWASP best practices
   ```
+
+Notes:
+- `fileExtensions` accepts a comma-separated mix of extensions (for example `.ts`, `.go`) and glob patterns (for example `**/*.sql`, `*.md`)
+- `fileExcludes` accepts a comma-separated mix of exact filenames and glob patterns (for example `secret.txt`, `**/*.gen.go`, `**/vendor/**`)
 
 3. If you do not already have Build Validation configured for your branch already add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created
 

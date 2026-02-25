@@ -2,10 +2,10 @@
   "manifestVersion": 1,
   "id": "fastronome-ai-code-review",
   "publisher": "Fastronome",
-  "version": "1.0.20",
+  "version": "1.0.26",
   "name": "Fastronome AI Code Review Task",
-  "description": "AI code review extension to review pull request changes using your own Azure OpenAI endpoints",
-  "public": false,
+  "description": "AI code review extension to review pull request changes using the OpenAI API",
+  "public": true,
   "categories": ["Azure Repos", "Azure Pipelines"],
   "tags": ["ai", "openai", "gpt", "llm", "gpt4", "copilot", "code", "review", "chatgpt"],
   "repository": {

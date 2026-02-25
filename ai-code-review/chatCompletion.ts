@@ -1,16 +1,17 @@
 import tl = require('azure-pipelines-task-lib/task');
 import { encode } from 'gpt-tokenizer';
-import OpenAI, { AzureOpenAI } from 'openai';
+import OpenAI from 'openai';
 
 export class ChatCompletion {
     private readonly systemMessage: string = '';
 
     constructor(
-        private _openAi: AzureOpenAI, 
+        private _openAi: OpenAI,
         checkForBugs: boolean = false,
         checkForPerformance: boolean = false,
         checkForBestPractices: boolean = false,
         additionalPrompts: string[] = [],
+        private _model: string = 'gpt-4o-mini',
         private _maxTokens: number = 16384,
         numberOfFilesToReview: number = 1
      ) {
@@ -64,7 +65,7 @@ export class ChatCompletion {
                         content: diff
                     },
                 ],
-                model: ''
+                model: this._model
             });
 
             let response = openAi.choices;

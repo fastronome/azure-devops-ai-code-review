@@ -1,41 +1,33 @@
 {
     "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
-    "id": "abd1f390-3d55-4eb2-af0a-273c5dbf256f",
+    "id": "d6e6d37c-27b1-42d0-b9d1-60b37ec6f64a",
     "name": "AICodeReview",
     "friendlyName": "AI Code Review",
-    "description": "Complete a Code Review using Azure OpenAI services",
+    "description": "Complete a Code Review using the OpenAI API",
     "category": "Utility",
     "author": "Tommi Laukkanen",
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 20
+        "Patch": 26
     },
     "instanceNameFormat": "AI Code Review $(message)",
     "inputs": [
         {
-            "name": "azureOpenAiDeploymentEndpointUrl",
+            "name": "apiKey",
             "type": "string",
-            "label": "Azure OpenAI deployment endpoint URL",
+            "label": "OpenAI API Key",
             "defaultValue": "",
             "required": true,
-            "helpMarkDown": "URL to your Azure OpenAI deployment endpoint."
+            "helpMarkDown": "API key for the OpenAI API."
         },
         {
-            "name": "azureOpenAiApiKey",
+            "name": "aiModel",
             "type": "string",
-            "label": "Key to your Azure OpenAI deployment endpoint",
-            "defaultValue": "",
+            "label": "OpenAI model",
+            "defaultValue": "gpt-4o-mini",
             "required": true,
-            "helpMarkDown": "Key to your Azure OpenAI deployment endpoint."
-        },
-        {
-            "name": "azureOpenAiApiVersion",
-            "type": "string",
-            "label": "Azure OpenAI API version",
-            "defaultValue": "2024-07-01-preview",
-            "required": true,
-            "helpMarkDown": "Azure OpenAI API version."
+            "helpMarkDown": "OpenAI model name to use for review generation. Example: gpt-4o-mini."
         },
         {
             "name": "reviewBugs",
@@ -64,7 +56,7 @@
             "label": "File Extensions",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "Specify a comma-separated list of file extensions for which you want to perform a code review. This input helps narrow down the scope of the code review to specific file types.\n\n**Example:**\n```plaintext\n\".js,.ts,.css,.html\"\n```\n\nMake sure to provide the file extensions without spaces after the commas."
+            "helpMarkDown": "Specify a comma-separated list of file extensions and/or glob patterns for which you want to perform a code review. This input helps narrow down the scope of the code review to specific file types or paths.\n\n**Examples:**\n```plaintext\n\".js,.ts,.css,.html\"\n\".go,**/*.sql,*.md\"\n```\n\nYou can mix extensions and glob patterns. Whitespace around commas is ignored."
         },
         {
             "name": "fileExcludes",
@@ -72,7 +64,7 @@
             "label": "Files to exclude",
             "defaultValue": "",
             "required": false,
-            "helpMarkDown": "## Files to Exclude Configuration\n\n### Description\nSpecify a comma-separated list of file names that should be excluded from code reviews. This is useful for excluding sensitive files or preventing certain files from being reviewed.\n\n### Format\nProvide a list of file names separated by commas. For example: `file1.js, file2.py, secret.txt`\n\n### Default Value\nIf no files are specified, all files will be considered for code review by default."
+            "helpMarkDown": "## Files to Exclude Configuration\n\n### Description\nSpecify a comma-separated list of file names, file extensions, and/or glob patterns that should be excluded from code reviews. This is useful for excluding sensitive files, generated files, or whole path patterns.\n\n### Format\nProvide values separated by commas. Examples: `secret.txt, .gen.go, **/*.pb.go, **/vendor/**`\n\n### Default Value\nIf no files are specified, all files will be considered for code review by default."
         },
         {
             "name": "additionalPrompts",
@@ -88,7 +80,7 @@
             "label": "Input prompt tokens price per million tokens",
             "defaultValue": "0",
             "required": false,
-            "helpMarkDown": "Unit price of input tokens per million tokens. Check from Azure pricing table."
+            "helpMarkDown": "Unit price of input tokens per million tokens. Check from your OpenAI pricing table."
         },
         {
             "name": "completionTokensPricePerMillionTokens",
@@ -96,7 +88,7 @@
             "label": "Completion output tokens price per million tokens",
             "defaultValue": "0",
             "required": false,
-            "helpMarkDown": "Unit price of completion tokens per million tokens. Check from Azure pricing table."
+            "helpMarkDown": "Unit price of completion tokens per million tokens. Check from your OpenAI pricing table."
         },
         {
             "name": "reviewWholeDiffAtOnce",
@@ -122,10 +114,10 @@
         }
     ],
     "execution": {
-        "Node10": {
+        "Node16": {
             "target": "dist/main.js"
         },
-        "Node16": {
+        "Node20_1": {
             "target": "dist/main.js"
         }
     }

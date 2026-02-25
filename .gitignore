@@ -14,6 +14,10 @@
 .idea/
 *.iml
 
+# Local environment variables
+.env
+.taskkey
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

@@ -27,16 +27,23 @@ export class Repository {
         let filesToReview = files.filter(file => !binaryExtensions.includes(file.slice((file.lastIndexOf(".") - 1 >>> 0) + 2)));
 
         if(fileExtensions) {
-            console.log(`File extensions specified: ${fileExtensions}`);
-            let fileExtensionsToInclude = fileExtensions.trim().split(',');
-            filesToReview = filesToReview.filter(file => fileExtensionsToInclude.includes(file.substring(file.lastIndexOf('.'))));
+            const includePatterns = fileExtensions
+                .split(',')
+                .map(pattern => pattern.trim())
+                .filter(pattern => pattern.length > 0);
+            console.log(`Include patterns/extensions specified: ${includePatterns.join(', ')}`);
+            filesToReview = filesToReview.filter(file => this.matchesPattern(file, includePatterns));
         } else {
             console.log('No file extensions specified. All files will be reviewed.');
         }
 
         if(filesToExclude) {
-            let fileNamesToExclude = filesToExclude.trim().split(',')
-            filesToReview = filesToReview.filter(file => !fileNamesToExclude.includes(file.split('/').pop()!.trim()))
+            const excludePatterns = filesToExclude
+                .split(',')
+                .map(pattern => pattern.trim())
+                .filter(pattern => pattern.length > 0);
+            console.log(`Exclude patterns specified: ${excludePatterns.join(', ')}`);
+            filesToReview = filesToReview.filter(file => !this.matchesPattern(file, excludePatterns));
         }
 
         return filesToReview;
@@ -62,5 +69,84 @@ export class Repository {
         }
 
         return `origin/${targetBranchName}`;
+    }
+
+    private matchesPattern(filePath: string, patterns: string[]): boolean {
+        const normalizedFilePath = filePath.replace(/\\/g, '/');
+        const fileName = normalizedFilePath.split('/').pop() ?? normalizedFilePath;
+
+        return patterns.some(pattern => {
+            const normalizedPattern = pattern.replace(/\\/g, '/');
+
+            if (this.globMatches(normalizedFilePath, normalizedPattern)) {
+                return true;
+            }
+
+            if (this.isExtensionToken(normalizedPattern)) {
+                return normalizedFilePath.endsWith(normalizedPattern);
+            }
+
+            // Backward compatibility: plain filenames (e.g. "secret.txt") match basenames.
+            if (!normalizedPattern.includes('/')) {
+                return this.globMatches(fileName, normalizedPattern);
+            }
+
+            return false;
+        });
+    }
+
+    private isExtensionToken(pattern: string): boolean {
+        return pattern.startsWith('.')
+            && !pattern.includes('/')
+            && !pattern.includes('*')
+            && !pattern.includes('?');
+    }
+
+    private globMatches(value: string, pattern: string): boolean {
+        return this.globToRegExp(pattern).test(value);
+    }
+
+    private globToRegExp(pattern: string): RegExp {
+        let regex = '^';
+
+        for (let i = 0; i < pattern.length; i++) {
+            const ch = pattern[i];
+
+            if (ch === '*') {
+                const next = pattern[i + 1];
+                const afterNext = pattern[i + 2];
+
+                // Support **/ prefix for "any nested directories, including none".
+                if (next === '*' && afterNext === '/') {
+                    regex += '(?:.*/)?';
+                    i += 2;
+                    continue;
+                }
+
+                if (next === '*') {
+                    regex += '.*';
+                    i += 1;
+                    continue;
+                }
+
+                regex += '[^/]*';
+                continue;
+            }
+
+            if (ch === '?') {
+                regex += '[^/]';
+                continue;
+            }
+
+            if ('\\^$+?.()|{}[]'.includes(ch)) {
+                regex += `\\${ch}`;
+                continue;
+            }
+
+            regex += ch;
+        }
+
+        regex += '$';
+        return new RegExp(regex);
     }
 }
