@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "fastronome-ai-code-review",
     "publisher": "Fastronome",
-    "version": "1.0.33",
+    "version": "1.0.34",
     "name": "Fastronome AI Code Review Task",
     "description": "AI code review extension to review pull request changes using the OpenAI API",
     "public": true,
