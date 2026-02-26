@@ -61,6 +61,8 @@ You can set the token pricing on the task parameters and then you can see from y
     - task: AICodeReview@1
       inputs:
         apiKey: $(OpenAIApiKey)
+        # Optional: override for OpenAI-compatible gateways/providers
+        # apiBaseUrl: "https://api.openai.com/v1"
         aiModel: "gpt-4o-mini"
         promptTokensPricePerMillionTokens: "0.15"
         completionTokensPricePerMillionTokens: "0.6"
@@ -77,6 +79,7 @@ You can set the token pricing on the task parameters and then you can see from y
   ```
 
 Notes:
+- `apiBaseUrl` is optional. Use it only when you need a custom OpenAI-compatible endpoint (proxy, gateway, or provider-specific base URL). Leave it unset for the default OpenAI API.
 - `fileExtensions` accepts a comma-separated mix of extensions (for example `.ts`, `.go`) and glob patterns (for example `**/*.sql`, `*.md`)
 - `fileExcludes` accepts a comma-separated mix of exact filenames and glob patterns (for example `secret.txt`, `**/*.gen.go`, `**/vendor/**`)
 

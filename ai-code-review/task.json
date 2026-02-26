@@ -9,7 +9,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 30
+        "Patch": 32
     },
     "instanceNameFormat": "AI Code Review $(message)",
     "inputs": [
@@ -20,6 +20,14 @@
             "defaultValue": "",
             "required": true,
             "helpMarkDown": "API key for the OpenAI API."
+        },
+        {
+            "name": "apiBaseUrl",
+            "type": "string",
+            "label": "OpenAI API base URL",
+            "defaultValue": "",
+            "required": false,
+            "helpMarkDown": "Optional base URL override for OpenAI-compatible APIs or gateways. Leave empty to use the default OpenAI API endpoint. Example: `https://api.openai.com/v1`"
         },
         {
             "name": "aiModel",

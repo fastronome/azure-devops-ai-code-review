@@ -21,6 +21,7 @@ export class Main {
         }
 
         const apiKey = tl.getInput('apiKey', true)!;
+        const apiBaseUrl = tl.getInput('apiBaseUrl', false)?.trim();
         const aiModel = tl.getInput('aiModel', true)!;
         const fileExtensions = tl.getInput('fileExtensions', false);
         const filesToExclude = tl.getInput('fileExcludes', false);
@@ -31,7 +32,10 @@ export class Main {
         const reviewWholeDiffAtOnce = tl.getBoolInput('reviewWholeDiffAtOnce', false);
         const addCostToComments = tl.getBoolInput('addCostToComments', false);
 
-        const client = new OpenAI({ apiKey });
+        const client = new OpenAI({
+            apiKey,
+            ...(apiBaseUrl ? { baseURL: apiBaseUrl } : {})
+        });
         
         this._repository = new Repository();
         this._pullRequest = new PullRequest();
