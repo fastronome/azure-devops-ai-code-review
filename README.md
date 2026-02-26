@@ -1,5 +1,8 @@
 # Fastronome AI Code Review DevOps Extension
 
+[![Azure DevOps Marketplace](https://img.shields.io/badge/Azure%20DevOps-Marketplace-blue)](https://marketplace.visualstudio.com/items?itemName=Fastronome.fastronome-ai-code-review)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.txt)
+
 ## Supercharge Your Code Reviews with the OpenAI API
 
 Use your own OpenAI API key to provide pull request code reviews while keeping your code private.
@@ -84,6 +87,25 @@ Notes:
 - `fileExcludes` accepts a comma-separated mix of exact filenames and glob patterns (for example `secret.txt`, `**/*.gen.go`, `**/vendor/**`)
 
 3. If you do not already have Build Validation configured for your branch already add [Build validation](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation) to your branch policy to trigger the code review when a Pull Request is created
+
+## Input Reference
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `apiKey` | Yes | - | OpenAI API key used to generate reviews |
+| `apiBaseUrl` | No | OpenAI default endpoint | Optional base URL override for OpenAI-compatible providers/gateways |
+| `aiModel` | Yes | `gpt-4o-mini` | OpenAI model name used for review generation |
+| `reviewBugs` | No | `true` | Include bug-focused checks in the review |
+| `reviewPerformance` | No | `true` | Include performance-focused checks in the review |
+| `reviewBestPractices` | No | `true` | Include best-practice checks in the review |
+| `fileExtensions` | No | - | Comma-separated file extensions and/or glob patterns to include |
+| `fileExcludes` | No | - | Comma-separated filenames and/or glob patterns to exclude |
+| `additionalPrompts` | No | - | Extra review instructions appended to the main prompt |
+| `promptTokensPricePerMillionTokens` | No | `0` | Input token price per million (used for cost reporting) |
+| `completionTokensPricePerMillionTokens` | No | `0` | Output token price per million (used for cost reporting) |
+| `reviewWholeDiffAtOnce` | No | `false` | Review the full PR diff in one pass instead of per-file |
+| `maxTokens` | No | `16384` | Maximum tokens for each review request |
+| `addCostToComments` | No | `false` | Append estimated review cost to posted comments |
 
 ## FAQ
 
