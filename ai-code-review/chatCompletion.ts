@@ -13,10 +13,11 @@ export class ChatCompletion {
         additionalPrompts: string[] = [],
         private _model: string = 'gpt-4o-mini',
         private _maxTokens: number = 16384,
-        numberOfFilesToReview: number = 1
+        numberOfFilesToReview: number = 1,
+        reviewWholeDiffAtOnce: boolean = false
      ) {
         this.systemMessage = `Your task is to act as a code reviewer of a Pull Request:
-        ${numberOfFilesToReview > 1 ? '- Generate high-level summary and a technical walkthrough of all pull request changes' : null}
+        ${reviewWholeDiffAtOnce ? '- Generate a high-level summary and a technical walkthrough of all pull request changes' : null}
         ${checkForBugs ? '- If there are any bugs, highlight them.' : null}
         ${checkForPerformance ? '- If there are major performance problems, highlight them.' : null}
         ${checkForBestPractices ? '- Provide details on missed use of best-practices.' : null}
@@ -24,7 +25,11 @@ export class ChatCompletion {
         - Do not highlight minor issues and nitpicks.
         - Only provide instructions for improvements.
         - If you have no specific instructions for a certain topic, then do not mention the topic at all.
-        - If you have no instructions for code then respond with NO_COMMENT only, otherwise provide your instructions.
+        ${reviewWholeDiffAtOnce
+            ? `- In full-diff review mode, always provide a diff overview and file review table before any detailed comments.
+        - Do not respond with NO_COMMENT only in full-diff review mode.
+        - If there are no improvement instructions, still provide the summary and table, mark each file as ✅ Passed, and use "No comments" in the Comments column.`
+            : '- If you have no instructions for code then respond with NO_COMMENT only, otherwise provide your instructions.'}
     
         You are provided with the code changes (diffs) in a unidiff format.
         
@@ -33,8 +38,15 @@ export class ChatCompletion {
         - Use the code block syntax for larger code snippets but do not wrap the whole response in a code block
         - Use inline code syntax for smaller inline code snippets
 `
-        if (numberOfFilesToReview > 1) {
+        if (reviewWholeDiffAtOnce) {
             this.systemMessage += `
+        Start your response with this structure in this exact order:
+        1. ## Summary of changes
+        2. ## Feedback on files (markdown table)
+        3. ## Detailed comments (only if there are actionable issues or questions)
+
+        Do not start with a single free-form warning/comment. Always include the summary and table first.
+
         Create a markdown table that lists the files, review status, and comments.
         The table must include columns in this order: File Name | Status | Comments.
         Use only these status labels:
@@ -46,16 +58,20 @@ export class ChatCompletion {
 
         Example:
 
-        Summary of changes: ...
+        ## Summary of changes
+        ...
 
-        Feedback on files:
+        ## Feedback on files
         | File Name | Status | Comments |
         | --- | --- | --- |
         | file1.cs | ✅ Passed | No comments |
         | file2.js | ❓ Questions | - Is this null value expected from the API contract?<br>- Please confirm whether retries are handled upstream |
         | file3.py | ❌ Not Passed | - Validate user input before constructing the query |
         | styles.css | ✅ Passed | No comments |
-	`}
+
+        ## Detailed comments
+        - ...
+`}
     }
 
     public async PerformCodeReview(diff: string, fileName: string): 

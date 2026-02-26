@@ -45,7 +45,8 @@ export class Main {
             additionalPrompts,
             aiModel,
             maxTokens,
-            filesToReview.length
+            filesToReview.length,
+            reviewWholeDiffAtOnce
         );
 
         await this._pullRequest.DeleteComments();
@@ -80,10 +81,7 @@ export class Main {
             promptTokensTotal += review.promptTokens;
             completionTokensTotal += review.completionTokens;
 
-            const isNoComment = review.response.indexOf('NO_COMMENT') >= 0;
-            let comment = isNoComment
-                ? this.BuildWholeDiffPassOverview(filesToReview)
-                : review.response;
+            let comment = review.response;
             if(addCostToComments) {
                 const promptTokensCost = promptTokensTotal * (promptTokensPricePerMillionTokens / 1000000);
                 const completionTokensCost = completionTokensTotal * (completionTokensPricePerMillionTokens / 1000000);
@@ -91,13 +89,12 @@ export class Main {
                 comment += `\n\n💰 _It cost $${totalCostString} to create this review_`;
             }
 
-            if(!isNoComment) {
+            if(review.response.indexOf('NO_COMMENT') < 0) {
                 console.info(`Completed review for ${filesToReview.length} files`)
                 const threadStatus = this.GetThreadStatus(review.response, true);
                 await this._pullRequest.AddComment("", comment, threadStatus);
             } else {
-                console.info(`No improvement comments for full diff, creating resolved overview for ${filesToReview.length} files`)
-                await this._pullRequest.AddComment("", comment, 'resolved');
+                console.info(`No comments for full diff`)
             }
         }
 
@@ -186,31 +183,6 @@ export class Main {
         }
 
         return sawRecognizedStatus ? 'resolved' : 'active';
-    }
-
-    private static BuildWholeDiffPassOverview(filesToReview: string[]): string {
-        const fileCount = filesToReview.length;
-        const fileLabel = fileCount === 1 ? 'file' : 'files';
-        const summary = fileCount > 0
-            ? `Summary of changes: Reviewed ${fileCount} ${fileLabel}. No improvement instructions were identified.`
-            : 'Summary of changes: No files matched the configured review filters.';
-
-        const rows = fileCount > 0
-            ? filesToReview.map(file => `| ${this.EscapeMarkdownTableCell(file)} | ✅ Passed | No comments |`)
-            : ['| _No files reviewed_ | ✅ Passed | No comments |'];
-
-        return [
-            summary,
-            '',
-            'Feedback on files:',
-            '| File Name | Status | Comments |',
-            '| --- | --- | --- |',
-            ...rows
-        ].join('\n');
-    }
-
-    private static EscapeMarkdownTableCell(value: string): string {
-        return value.replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
     }
 
     private static ParseMarkdownTableRow(line: string): string[] {

@@ -5,11 +5,11 @@
     "friendlyName": "AI Code Review",
     "description": "Complete a Code Review using the OpenAI API",
     "category": "Utility",
-    "author": "Tommi Laukkanen",
+    "author": "Alexey Samoylov (Fastronome)",
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 28
+        "Patch": 30
     },
     "instanceNameFormat": "AI Code Review $(message)",
     "inputs": [

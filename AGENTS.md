@@ -38,6 +38,37 @@ bd sync               # Sync with git
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 
+## Version Bump Instructions (Release / Publish)
+
+When preparing a new extension publish, bump versions in **all** of these files in lockstep:
+
+- `vss-extension.json` -> `"version": "1.0.xx"`
+- `package.json` -> `"version": "1.0.xx"`
+- `ai-code-review/package.json` -> `"version": "1.0.xx"`
+- `ai-code-review/task.json` -> `"version"."Patch": xx`
+
+Rules:
+
+- Keep the patch number aligned across all files (example: `1.0.29` + `Patch: 29`)
+- If `tfx extension publish` says version already exists, bump again in all four places
+- Do not bump only `vss-extension.json`; publish/marketplace/task metadata must stay consistent
+
+Recommended workflow:
+
+```bash
+# 1) Bump all 4 version fields
+# 2) Rebuild the task bundle
+task build
+
+# 3) Publish (Taskfile loads .env / TFX_PAT)
+task publish
+```
+
+Notes:
+
+- Azure Pipelines task banner metadata comes from `ai-code-review/task.json`
+- Extension marketplace version comes from `vss-extension.json`
+
 
 
 <!-- BEGIN BEADS INTEGRATION -->
