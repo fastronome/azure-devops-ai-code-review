@@ -6,6 +6,7 @@
     "description": "Complete a Code Review using the OpenAI API",
     "category": "Utility",
     "author": "Alexey Samoylov (Fastronome)",
+    "iconUrl": "logo-fastronome-32.png",
     "version": {
         "Major": 1,
         "Minor": 0,

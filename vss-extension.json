@@ -26,7 +26,7 @@
         "uri": "https://github.com/fastronome/azure-devops-ai-code-review"
     },
     "icons": {
-        "default": "images/icon-128x128.png"
+        "default": "images/logo-fastronome-128.png"
     },
     "targets": [
         {

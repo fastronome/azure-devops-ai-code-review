@@ -18,7 +18,7 @@ Original project lineage is preserved and attributed in the license section belo
 - **Faster Reviews:** Reduce the time spent on code reviews. Let Open AI handle the routine, allowing your team to focus on impactful work.
 - **Configurable and Customizable:** Tailor the extension to your needs with customizable settings. Specify the Open AI model, define file exclusions, and more.
 
-![](images/ai-review-buddy-640.png)
+![](images/logo-fastronome-640.png)
 
 ## Sample review
 
